@@ -1,5 +1,6 @@
 package main;
 
+import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -23,10 +24,12 @@ public class GamePanel extends JPanel implements Runnable
 		final int FPS = 60;
 		Thread gameThread;
 		Board board = new Board();
+		MovePieces movePieces = new MovePieces();
 		
 		// Pieces
 		public static ArrayList<Piece> pieces = new ArrayList<>();
 		public static ArrayList<Piece> simPieces = new ArrayList<>();
+		Piece activePiece;
 		
 		
 		// Color
@@ -38,6 +41,8 @@ public class GamePanel extends JPanel implements Runnable
 			{
 				setPreferredSize(new Dimension(WIDTH,HEIGHT));
 				setBackground(Color.black);
+				addMouseMotionListener(movePieces);
+				addMouseListener(movePieces);
 				
 				setPieces();
 				copyPieces(pieces, simPieces);
@@ -147,9 +152,52 @@ public class GamePanel extends JPanel implements Runnable
 	
 		private void update()
 			{
+				// When the mouse has been clicked
+				if(movePieces.mouseClicked)
+					{
+						if(activePiece == null)
+							{
+								// If the active piece is null, check if you can pick up a piece
+								for(Piece piece : simPieces)
+									{
+										if(piece.color == currentColor && piece.col == movePieces.x/Board.SQUARE_SIZE && piece.row == movePieces.y/Board.SQUARE_SIZE)
+											{
+												activePiece = piece;
+												
+											}
+									}
+							}
+						else
+							{
+								// If the player is holding a piece, simulate the move
+								simulate();
+							}
+					}
 				
+				// When the mouse has been released
+				if(movePieces.mouseClicked == false)
+					{
+						if(activePiece != null)
+							{
+								activePiece.updatePosition();
+								activePiece = null;
+							}
+					}
 			}
 		
+		private void simulate() 
+			{
+				// TODO Auto-generated method stub
+			
+				//  If a piece is being held, update its position
+				activePiece.x = movePieces.x - Board.HALF_SQUARE_SIZE;
+				activePiece.y = movePieces.y - Board.HALF_SQUARE_SIZE;
+				activePiece.col = activePiece.getCol(activePiece.x);
+				activePiece.row = activePiece.getRow(activePiece.y);
+				
+				
+			}
+
 		public void paintComponent (Graphics g)
 			{
 				super.paintComponent(g);
@@ -160,6 +208,17 @@ public class GamePanel extends JPanel implements Runnable
 				for(Piece p : simPieces)
 					{
 						p.draw(g2);
+					}
+				
+				if (activePiece != null)
+					{
+						g2.setColor(Color.white);
+						g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.7f));
+						g2.fillRect(activePiece.col*Board.SQUARE_SIZE, activePiece.row*Board.SQUARE_SIZE, Board.SQUARE_SIZE, Board.SQUARE_SIZE);
+						g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
+						
+						// Draw the active Piece in the end, so that it will not be hidden by the board or the colored square
+						activePiece.draw(g2);
 					}
 			}
 		

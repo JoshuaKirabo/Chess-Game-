@@ -1,5 +1,37 @@
 package main;
 
-public class MovePieces {
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
-}
+public class MovePieces extends MouseAdapter
+	{
+		public int x,y;
+		public boolean mouseClicked;
+		
+	
+		@Override
+		public void mousePressed(MouseEvent e)
+			{
+				mouseClicked = true;
+			}
+		
+		@Override
+		public void mouseReleased(MouseEvent e)
+			{
+				mouseClicked = false;
+			}
+		
+		@Override
+		public void mouseDragged(MouseEvent e)
+			{
+				x = e.getX();
+				y = e.getY();
+			}
+		
+		@Override
+		public void mouseMoved(MouseEvent e)
+			{
+				x = e.getX();
+				y = e.getY();
+			}
+	}
